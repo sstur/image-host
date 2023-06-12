@@ -12,6 +12,7 @@ import {
   toFullyQualifiedUrl,
   validateImageFileName,
 } from '../support/image';
+import { SECRET_KEY } from '../support/constants';
 
 const uploadsDirRelative = '../../uploads';
 const uploadsDir = resolve(__dirname, uploadsDirRelative);
@@ -37,6 +38,12 @@ export default (app: Application) => {
   });
 
   app.post('/images', async (request, response) => {
+    const authHeader = request.header('authorization') ?? '';
+    const secretKey = authHeader.replace(/^Bearer /i, '');
+    if (secretKey !== SECRET_KEY) {
+      response.status(401).send({ error: 'Unauthorized' });
+      return;
+    }
     const contentType =
       request.header('content-disposition') ??
       request.header('content-type') ??
