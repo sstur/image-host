@@ -1,12 +1,9 @@
 import { createHmac } from 'crypto';
 
-const secret = process.env.SECRET_KEY ?? '';
-if (!secret) {
-  throw new Error('Environment variable SECRET_KEY not found');
-}
+import { SECRET_KEY } from './constants';
 
 function getSignature(text: string) {
-  const hmac = createHmac('sha256', secret);
+  const hmac = createHmac('sha256', SECRET_KEY);
   hmac.update(text);
   const hex = hmac.digest('hex').slice(0, 10);
   return parseInt(hex, 16).toString(36).padStart(8, '0');

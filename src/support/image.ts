@@ -1,9 +1,5 @@
+import { IMAGE_SERVING_URL } from './constants';
 import { verify } from './signature';
-
-const imageServingUrl = process.env.IMAGE_SERVING_URL ?? '';
-if (!imageServingUrl) {
-  throw new Error('Environment variable IMAGE_SERVING_URL not found');
-}
 
 // The single-letter identifier will be encoded into the signed file ID
 const supportedImageTypes: Record<string, { type: string; ext: string }> = {
@@ -36,5 +32,5 @@ export function validateImageFileName(fileName: string) {
 }
 
 export function toFullyQualifiedUrl(fileName: string) {
-  return imageServingUrl.replace('%FILE_NAME%', fileName);
+  return IMAGE_SERVING_URL.replace('%FILE_NAME%', fileName);
 }
