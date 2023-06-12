@@ -20,6 +20,7 @@ export function validateImageFileName(fileName: string) {
     return false;
   }
   const [id = '', ext = ''] = fileName.split('.');
+  // TODO: We probably don't actually need to cryptographically verify here
   if (!verify(id)) {
     return false;
   }

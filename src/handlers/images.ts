@@ -16,6 +16,7 @@ import {
 const uploadsDirRelative = '../../uploads';
 const uploadsDir = resolve(__dirname, uploadsDirRelative);
 
+// TODO: Wrap each of these in a try/catch
 export default (app: Application) => {
   app.get('/images/:fileName', (request, response, next) => {
     const fileName = request.params.fileName ?? '';
