@@ -33,12 +33,9 @@ export default (app: Application) => {
       if (!stats.isFile()) {
         return next();
       }
+      response.header('Content-Type', imageDetails.type);
       const readStream = createReadStream(filePath);
-      await pipeStreamAsync(readStream, response, {
-        beforeFirstWrite: () => {
-          response.header('Content-Type', imageDetails.type);
-        },
-      });
+      await pipeStreamAsync(readStream, response);
     }),
   );
 
