@@ -13,31 +13,30 @@ import {
   validateImageFileName,
 } from '../support/image';
 import { SECRET_KEY } from '../support/constants';
+import { pipeStreamAsync } from '../support/pipeStreamAsync';
 
 const uploadsDirRelative = '../../uploads';
 const uploadsDir = resolve(__dirname, uploadsDirRelative);
 
 // TODO: Wrap each of these in a try/catch
 export default (app: Application) => {
-  app.get('/images/:fileName', (request, response, next) => {
+  app.get('/images/:fileName', async (request, response, next) => {
     const fileName = request.params.fileName ?? '';
     const imageDetails = validateImageFileName(fileName);
     if (!imageDetails) {
       return next();
     }
     const filePath = resolve(uploadsDir, fileName);
+    const stats = await fs.stat(filePath);
+    if (!stats.isFile()) {
+      return next();
+    }
     const readStream = createReadStream(filePath);
-    readStream.once('data', () => {
-      response.header('Content-Type', imageDetails.type);
+    await pipeStreamAsync(readStream, response, {
+      beforeFirstWrite: () => {
+        response.header('Content-Type', imageDetails.type);
+      },
     });
-    readStream.on('error', (error) => {
-      if (Object(error).code === 'ENOENT') {
-        next();
-      } else {
-        next(error);
-      }
-    });
-    readStream.pipe(response);
   });
 
   app.post('/images', async (request, response) => {
@@ -60,14 +59,12 @@ export default (app: Application) => {
     await fs.mkdir(uploadsDir, { recursive: true });
     const fileName = id + '.' + imageType.ext;
     const filePath = resolve(uploadsDir, fileName);
-    const fileStream = createWriteStream(filePath);
-    request.on('end', () => {
-      response.json({
-        id,
-        fileName,
-        url: toFullyQualifiedUrl(fileName),
-      });
+    const writeStream = createWriteStream(filePath);
+    await pipeStreamAsync(request, writeStream);
+    response.json({
+      id,
+      fileName,
+      url: toFullyQualifiedUrl(fileName),
     });
-    request.pipe(fileStream);
   });
 };
