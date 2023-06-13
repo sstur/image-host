@@ -60,6 +60,7 @@ export default (app: Application) => {
     const fileStream = createWriteStream(filePath);
     request.on('end', () => {
       response.json({
+        id,
         fileName,
         url: toFullyQualifiedUrl(fileName),
       });
