@@ -17,19 +17,18 @@ export const imageByType = new Map(
 
 export function validateImageFileName(fileName: string) {
   if (!fileName.match(/^\w+\.\w+$/)) {
-    return false;
+    return;
   }
   const [id = '', ext = ''] = fileName.split('.');
-  // TODO: We probably don't actually need to cryptographically verify here
   if (!verify(id)) {
-    return false;
+    return;
   }
   const typeId = id.slice(0, -8).slice(-1);
-  const imageType = imageById.get(typeId);
-  if (!imageType || ext !== imageType.ext) {
-    return false;
+  const imageDetails = imageById.get(typeId);
+  if (!imageDetails || ext !== imageDetails.ext) {
+    return;
   }
-  return true;
+  return imageDetails;
 }
 
 export function toFullyQualifiedUrl(fileName: string) {

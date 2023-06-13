@@ -21,12 +21,15 @@ const uploadsDir = resolve(__dirname, uploadsDirRelative);
 export default (app: Application) => {
   app.get('/images/:fileName', (request, response, next) => {
     const fileName = request.params.fileName ?? '';
-    const isValid = validateImageFileName(fileName);
-    if (!isValid) {
+    const imageDetails = validateImageFileName(fileName);
+    if (!imageDetails) {
       return next();
     }
     const filePath = resolve(uploadsDir, fileName);
     const readStream = createReadStream(filePath);
+    readStream.once('data', () => {
+      response.header('Content-Type', imageDetails.type);
+    });
     readStream.on('error', (error) => {
       if (Object(error).code === 'ENOENT') {
         next();
